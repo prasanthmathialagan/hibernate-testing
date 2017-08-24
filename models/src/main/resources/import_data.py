@@ -135,6 +135,32 @@ def import_votes(file):
 	cursor.close()
 	con.close()
 
+'''
+<postlinks>
+	<row Id="327" CreationDate="2015-01-24T03:20:43.000" PostId="185" RelatedPostId="199" LinkTypeId="1" />
+</postlinks>
+'''
+def import_postlinks(file):
+	sql="INSERT INTO PostLinks (`id`, `createdDate`, `postId`, `relatedPostId`, `linkTypeId`) VALUES (%s, %s, %s, %s, %s)"
+	print "Importing PostLinks from " + file
+	postlinks = tree.parse(file).getroot()
+	total=len(postlinks)
+	count=0;
+	con=get_connection();
+	cursor=con.cursor()
+	for row in postlinks:
+		rdata=(int(row.attrib['Id']), row.attrib['CreationDate'], int(row.attrib['PostId']), int(row.attrib['RelatedPostId']), int(row.attrib['LinkTypeId']))
+		cursor.execute(sql, rdata)
+		count=count+1
+		if count % 100 == 0:
+			con.commit()
+			print "Processed " + str(count) + "/" + str(total)
+
+	con.commit()
+	print "Processed " + str(count) + "/" + str(total)
+	cursor.close()
+	con.close()
+
 try:
 	data_dir=sys.argv[1]
 	print "Data directory is " + data_dir
@@ -148,3 +174,4 @@ import_badges(data_dir+"/Badges.xml")
 import_comments(data_dir+"/Comments.xml")
 import_tags(data_dir+"/Tags.xml")
 import_votes(data_dir+"/Votes.xml")
+import_postlinks(data_dir+"/PostLinks.xml")

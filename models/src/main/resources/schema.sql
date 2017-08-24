@@ -41,3 +41,13 @@ CREATE TABLE `Votes` (
   `bountyAmount` int(11),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `PostLinks`;
+CREATE TABLE `PostLinks` (
+  `id` bigint NOT NULL,
+  `createdDate` timestamp,
+  `postId` bigint NOT NULL,
+  `relatedPostId` bigint NOT NULL,
+  `linkTypeId` smallint,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
