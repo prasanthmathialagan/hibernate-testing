@@ -52,6 +52,11 @@ def import_badges(file):
 	cursor.close()
 	con.close()
 
+'''
+<comments>
+	<row Id="1" PostId="2" Score="0" Text="They can do this so simply as if it were a liquid?" CreationDate="2015-01-20T18:44:48.173" UserId="9" />
+</comments>
+'''
 def import_comments(file):
 	sql="INSERT INTO Comments (`id`, `postId`, `score`, `text`, `createdDate`, `userId`) VALUES (%s, %s, %s, %s, %s, %s)"
 	print "Importing Comments from " + file
@@ -61,12 +66,36 @@ def import_comments(file):
 	con=get_connection();
 	cursor=con.cursor()
 	for row in comments:
-		rdata=()
-		try:
-			rdata=(int(row.attrib['Id']), int(row.attrib['PostId']), int(row.attrib['Score']), row.attrib['Text'], row.attrib['CreationDate'], int(row.attrib['UserId']))
-		except KeyError as e:
-			print "KeyError: " + str(e) + ". Skipping the row!!"
-			continue
+		userId=row.attrib.get("UserId", None)
+		rdata=(int(row.attrib['Id']), int(row.attrib['PostId']), int(row.attrib['Score']), row.attrib['Text'], row.attrib['CreationDate'], userId)
+		cursor.execute(sql, rdata)
+		count=count+1
+		if count % 100 == 0:
+			con.commit()
+			print "Processed " + str(count) + "/" + str(total)
+
+	con.commit()
+	print "Processed " + str(count) + "/" + str(total)
+	cursor.close()
+	con.close()
+
+'''
+<tags>
+	<row Id="1" TagName="liquid" Count="7" ExcerptPostId="130" WikiPostId="129" />
+</tags>
+'''
+def import_tags(file):
+	sql="INSERT INTO Tags (`id`, `name`, `count`, `excerptPostId`, `wikiPostId`) VALUES (%s, %s, %s, %s, %s)"
+	print "Importing Tags from " + file
+	tags = tree.parse(file).getroot()
+	total=len(tags)
+	count=0;
+	con=get_connection();
+	cursor=con.cursor()
+	for row in tags:
+		excerptPostId=row.attrib.get("ExcerptPostId", None)
+		wikiPostId=row.attrib.get("WikiPostId", None)
+		rdata=(int(row.attrib['Id']), row.attrib['TagName'], int(row.attrib['Count']), excerptPostId, wikiPostId)
 		cursor.execute(sql, rdata)
 		count=count+1
 		if count % 100 == 0:
@@ -89,3 +118,4 @@ load_properties("default.properties")
 
 import_badges(data_dir+"/Badges.xml")
 import_comments(data_dir+"/Comments.xml")
+import_tags(data_dir+"/Tags.xml")

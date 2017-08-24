@@ -17,6 +17,16 @@ CREATE TABLE `Comments` (
   `score` smallint,
   `text` varchar(500) NOT NULL,
   `createdDate` timestamp,
-  `userId` bigint NOT NULL,
+  `userId` bigint,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `Tags`;
+CREATE TABLE `Tags` (
+  `id` bigint NOT NULL,
+  `name` char(40) NOT NULL,
+  `count` int(11) DEFAULT 0,
+  `excerptPostId` bigint,
+  `wikiPostId` bigint,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
