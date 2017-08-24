@@ -10,3 +10,13 @@ CREATE TABLE `Badges` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `Comments`;
+CREATE TABLE `Comments` (
+  `id` bigint NOT NULL,
+  `postId` bigint NOT NULL,
+  `score` smallint,
+  `text` varchar(500) NOT NULL,
+  `createdDate` timestamp,
+  `userId` bigint NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

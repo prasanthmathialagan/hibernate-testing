@@ -33,7 +33,7 @@ def get_connection():
 '''
 def import_badges(file):
 	sql="INSERT INTO Badges (`id`, `userId`, `name`, `date`, `class`, `tagBased`) VALUES (%s, %s, %s, %s, %s, %s)"
-	print "Importing from " + file
+	print "Importing Badges from " + file
 	badges = tree.parse(file).getroot()
 	total=len(badges)
 	count=0;
@@ -49,6 +49,35 @@ def import_badges(file):
 
 	con.commit()
 	print "Processed " + str(count) + "/" + str(total)
+	cursor.close()
+	con.close()
+
+def import_comments(file):
+	sql="INSERT INTO Comments (`id`, `postId`, `score`, `text`, `createdDate`, `userId`) VALUES (%s, %s, %s, %s, %s, %s)"
+	print "Importing Comments from " + file
+	comments = tree.parse(file).getroot()
+	total=len(comments)
+	count=0;
+	con=get_connection();
+	cursor=con.cursor()
+	for row in comments:
+		rdata=()
+		try:
+			rdata=(int(row.attrib['Id']), int(row.attrib['PostId']), int(row.attrib['Score']), row.attrib['Text'], row.attrib['CreationDate'], int(row.attrib['UserId']))
+		except KeyError as e:
+			print "KeyError: " + str(e) + ". Skipping the row!!"
+			continue
+		cursor.execute(sql, rdata)
+		count=count+1
+		if count % 100 == 0:
+			con.commit()
+			print "Processed " + str(count) + "/" + str(total)
+
+	con.commit()
+	print "Processed " + str(count) + "/" + str(total)
+	cursor.close()
+	con.close()
+
 try:
 	data_dir=sys.argv[1]
 	print "Data directory is " + data_dir
@@ -59,3 +88,4 @@ except:
 load_properties("default.properties")
 
 import_badges(data_dir+"/Badges.xml")
+import_comments(data_dir+"/Comments.xml")
