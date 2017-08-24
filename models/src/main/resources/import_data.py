@@ -107,6 +107,34 @@ def import_tags(file):
 	cursor.close()
 	con.close()
 
+'''
+<votes>
+	<row Id="9048" PostId="2680" VoteTypeId="8" UserId="203" CreationDate="2015-05-04T00:00:00.000" BountyAmount="150" />
+</votes>
+'''
+def import_votes(file):
+	sql="INSERT INTO Votes (`id`, `postId`, `voteTypeId`, `createdDate`, `userId`, `bountyAmount`) VALUES (%s, %s, %s, %s, %s, %s)"
+	print "Importing Votes from " + file
+	votes = tree.parse(file).getroot()
+	total=len(votes)
+	count=0;
+	con=get_connection();
+	cursor=con.cursor()
+	for row in votes:
+		userId=row.attrib.get("UserId", None)
+		bountyAmount=row.attrib.get("BountyAmount", None)
+		rdata=(int(row.attrib['Id']), int(row.attrib['PostId']), int(row.attrib['VoteTypeId']), row.attrib['CreationDate'], userId, bountyAmount)
+		cursor.execute(sql, rdata)
+		count=count+1
+		if count % 100 == 0:
+			con.commit()
+			print "Processed " + str(count) + "/" + str(total)
+
+	con.commit()
+	print "Processed " + str(count) + "/" + str(total)
+	cursor.close()
+	con.close()
+
 try:
 	data_dir=sys.argv[1]
 	print "Data directory is " + data_dir
@@ -119,3 +147,4 @@ load_properties("default.properties")
 import_badges(data_dir+"/Badges.xml")
 import_comments(data_dir+"/Comments.xml")
 import_tags(data_dir+"/Tags.xml")
+import_votes(data_dir+"/Votes.xml")

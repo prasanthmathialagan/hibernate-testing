@@ -30,3 +30,14 @@ CREATE TABLE `Tags` (
   `wikiPostId` bigint,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `Votes`;
+CREATE TABLE `Votes` (
+  `id` bigint NOT NULL,
+  `postId` bigint NOT NULL,
+  `voteTypeId` bigint NOT NULL,
+  `createdDate` timestamp,
+  `userId` bigint,
+  `bountyAmount` int(11),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
