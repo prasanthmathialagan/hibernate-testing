@@ -168,6 +168,47 @@ except:
 	print "Not enough arguments. Usage: import_data.py <data directory>"
 	sys.exit(2)
 
+'''
+<users>
+	<row Id="-1" Reputation="1" CreationDate="2015-01-20T16:45:52.530" DisplayName="Community" LastAccessDate="2015-01-20T16:45:52.530"
+	Location="on the server farm" AboutMe="&lt;p&gt;Hi, I'm not really a person.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;I'm a background process that helps keep this site clean!&lt;/p&gt;&#xD;&#xA;&lt;p&gt;I do things like&lt;/p&gt;&#xD;&#xA;&lt;ul&gt;&#xD;&#xA;&lt;li&gt;Randomly poke old unanswered questions every hour so they get some attention&lt;/li&gt;&#xD;&#xA;&lt;li&gt;Own community questions and answers so nobody gets unnecessary reputation from them&lt;/li&gt;&#xD;&#xA;&lt;li&gt;Own downvotes on spam/evil posts that get permanently deleted&lt;/li&gt;&#xD;&#xA;&lt;li&gt;Own suggested edits from anonymous users&lt;/li&gt;&#xD;&#xA;&lt;li&gt;&lt;a href=&quot;http://meta.stackoverflow.com/a/92006&quot;&gt;Remove abandoned questions&lt;/a&gt;&lt;/li&gt;&#xD;&#xA;&lt;/ul&gt;"
+	Views="0" UpVotes="504" DownVotes="809" Age="2" AccountId="-1" />
+</users>
+'''
+def import_users(file):
+	sql="INSERT INTO Users (`id`, `reputation`, `createdDate`, `displayName`, `lastAccessDate`, `location`, `aboutMe`, `profileImageUrl`, `websiteUrl`, `age`, `views`, `accountId`, `upvotes`, `downvotes`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+	print "Importing Users from " + file
+	users = tree.parse(file).getroot()
+	total=len(users)
+	count=0;
+	con=get_connection();
+	cursor=con.cursor()
+	for row in users:
+		location=row.attrib.get("Location", None)
+		profileImageUrl=row.attrib.get("ProfileImageUrl", None)
+		websiteUrl=row.attrib.get("WebsiteUrl", None)
+		age=row.attrib.get("Age", None)
+		accountId=row.attrib.get("AccountId", None)
+		aboutMe=row.attrib.get("AboutMe", None)
+		rdata=(int(row.attrib['Id']), int(row.attrib['Reputation']), row.attrib['CreationDate'], row.attrib['DisplayName'], row.attrib['LastAccessDate'], location, aboutMe, profileImageUrl, websiteUrl, age, int(row.attrib['Views']), accountId, int(row.attrib['UpVotes']), int(row.attrib['DownVotes']))
+		cursor.execute(sql, rdata)
+		count=count+1
+		if count % 100 == 0:
+			con.commit()
+			print "Processed " + str(count) + "/" + str(total)
+
+	con.commit()
+	print "Processed " + str(count) + "/" + str(total)
+	cursor.close()
+	con.close()
+
+try:
+	data_dir=sys.argv[1]
+	print "Data directory is " + data_dir
+except:
+	print "Not enough arguments. Usage: import_data.py <data directory>"
+	sys.exit(2)
+
 load_properties("default.properties")
 
 import_badges(data_dir+"/Badges.xml")
@@ -175,3 +216,4 @@ import_comments(data_dir+"/Comments.xml")
 import_tags(data_dir+"/Tags.xml")
 import_votes(data_dir+"/Votes.xml")
 import_postlinks(data_dir+"/PostLinks.xml")
+import_users(data_dir+"/Users.xml")

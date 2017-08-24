@@ -51,3 +51,22 @@ CREATE TABLE `PostLinks` (
   `linkTypeId` smallint,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `Users`;
+CREATE TABLE `Users` (
+  `id` bigint NOT NULL,
+  `reputation` int(11),
+  `createdDate` timestamp,
+  `displayName` char(40),
+  `lastAccessDate` timestamp,
+  `location` char(40),
+  `aboutMe` varchar(500),
+  `profileImageUrl` varchar(500),
+  `websiteUrl` varchar(500),
+  `age` smallint,
+  `views` int(11),
+  `accountId` bigint,
+  `upvotes` smallint,
+  `downvotes` smallint,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
