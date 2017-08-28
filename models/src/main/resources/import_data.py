@@ -2,6 +2,7 @@ import mysql.connector
 import sys
 import ConfigParser
 import xml.etree.ElementTree as tree
+import uuid
 
 db_user=""
 db_password=""
@@ -249,6 +250,40 @@ def import_posts(file):
 	cursor.close()
 	con.close()
 
+'''
+<posthistory>
+	<row Id="1" PostHistoryTypeId="2" PostId="1" RevisionGUID="d8299b2b-815a-44c6-a243-45131239e0a7" 
+	CreationDate="2015-01-20T18:35:59.493" UserId="9" Text="If so, what are the challenges? If not, what are the alternatives?" />
+</posthistory>
+'''
+def import_posthistory(file):
+	sql="INSERT INTO PostHistory (`id`, `postHistoryTypeId`, `postId`, `revisionGUID`, `createdDate`, " \
+		"`userId`, `userDisplayName`, `comment`, `text`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+	print "Importing PostHistory from " + file
+	posthistory = tree.parse(file).getroot()
+	total=len(posthistory)
+	count=0;
+	con=get_connection();
+	cursor=con.cursor()
+	for row in posthistory:
+		revisionGUID=row.attrib["RevisionGUID"]
+		userDisplayName=row.attrib.get("UserDisplayName", None)
+		comment=row.attrib.get("Comment", None)
+		text=row.attrib.get("Text", None)
+		userId=row.attrib.get("UserId", None)
+		rdata=(int(row.attrib['Id']), int(row.attrib['PostHistoryTypeId']), int(row.attrib['PostId']), revisionGUID, row.attrib['CreationDate'], \
+				userId, userDisplayName, comment, text)
+		cursor.execute(sql, rdata)
+		count=count+1
+		if count % 100 == 0:
+			con.commit()
+			print "Processed " + str(count) + "/" + str(total)
+
+	con.commit()
+	print "Processed " + str(count) + "/" + str(total)
+	cursor.close()
+	con.close()
+
 try:
 	data_dir=sys.argv[1]
 	print "Data directory is " + data_dir
@@ -258,6 +293,7 @@ except:
 
 load_properties("default.properties")
 
+'''
 import_badges(data_dir+"/Badges.xml")
 import_comments(data_dir+"/Comments.xml")
 import_tags(data_dir+"/Tags.xml")
@@ -265,3 +301,5 @@ import_votes(data_dir+"/Votes.xml")
 import_postlinks(data_dir+"/PostLinks.xml")
 import_users(data_dir+"/Users.xml")
 import_posts(data_dir+"/Posts.xml")
+'''
+import_posthistory(data_dir+"/PostHistory.xml")

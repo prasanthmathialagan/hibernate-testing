@@ -94,3 +94,17 @@ CREATE TABLE `Posts` (
   `favoriteCount` smallint,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `PostHistory`;
+CREATE TABLE `PostHistory` (
+  `id` bigint NOT NULL,
+  `postHistoryTypeId` smallint,
+  `postId` bigint,
+  `revisionGUID` char(40),
+  `createdDate` timestamp,
+  `userId` bigint,
+  `userDisplayName` char(40),
+  `comment` varchar(500),
+  `text` varchar(500),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
