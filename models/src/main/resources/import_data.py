@@ -202,6 +202,53 @@ def import_users(file):
 	cursor.close()
 	con.close()
 
+'''
+<posts>
+	<row Id="1" PostTypeId="1" AcceptedAnswerId="2" CreationDate="2015-01-20T18:35:59.493" Score="27" ViewCount="2612" 
+	Body="&lt;p&gt;Is it possible to &quot;pump&quot; a powder the same way liquids can be pumped?&lt;/p&gt;&#xA;&#xA;&lt;p&gt;If so, what are the challenges? If not, what are some alternatives?&lt;/p&gt;&#xA;" OwnerUserId="9" LastEditorUserId="148" LastEditDate="2015-01-21T08:28:32.950" LastActivityDate="2016-06-28T09:12:52.693" Title="Is it possible to &quot;pump&quot; a powder?" Tags="&lt;pumps&gt;&lt;liquid&gt;&lt;fluid-mechanics&gt;" 
+	AnswerCount="7" CommentCount="2" FavoriteCount="2" />
+</posts>
+'''
+def import_posts(file):
+	sql="INSERT INTO Posts (`id`, `postTypeId`, `parentId`, `acceptedAnswerId`, `createdDate`, " \
+		"`score`, `views`, `ownerUserId`, `lastEditorUserId`, `lastEditorDisplayName`, `lastEditDate`, " \
+		"`lastActivityDate`, `communityOwnedDate`, `closedDate`, `title`, `tags`, `answerCount`, `commentCount`, " \
+		"`favoriteCount`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+	print "Importing Posts from " + file
+	posts = tree.parse(file).getroot()
+	total=len(posts)
+	count=0;
+	con=get_connection();
+	cursor=con.cursor()
+	for row in posts:
+		parentId=row.attrib.get("ParentId", None)
+		ownerUserId=row.attrib.get("OwnerUserId", None)
+		acceptedAnswerId=row.attrib.get("AcceptedAnswerId", None)
+		lastEditorUserId=row.attrib.get("LastEditorUserId", None)
+		lastEditorDisplayName=row.attrib.get("LastEditorDisplayName", None)
+		lastEditDate=row.attrib.get("LastEditDate", None)
+		communityOwnedDate=row.attrib.get("CommunityOwnedDate", None)
+		closedDate=row.attrib.get("ClosedDate", None)
+		tags=row.attrib.get("Tags", None)
+		viewCount=row.attrib.get("ViewCount", None)
+		answerCount=row.attrib.get("AnswerCount", None)
+		commentCount=row.attrib.get("CommentCount", None)
+		favoriteCount=row.attrib.get("FavoriteCount", None)
+		title=row.attrib.get("Title", None)
+		rdata=(int(row.attrib['Id']), int(row.attrib['PostTypeId']), parentId, acceptedAnswerId, row.attrib['CreationDate'], \
+			   int(row.attrib['Score']), viewCount, ownerUserId, lastEditorUserId, lastEditorDisplayName, lastEditDate, \
+			   row.attrib['LastActivityDate'], communityOwnedDate, closedDate, title, tags, answerCount, commentCount, favoriteCount)
+		cursor.execute(sql, rdata)
+		count=count+1
+		if count % 100 == 0:
+			con.commit()
+			print "Processed " + str(count) + "/" + str(total)
+
+	con.commit()
+	print "Processed " + str(count) + "/" + str(total)
+	cursor.close()
+	con.close()
+
 try:
 	data_dir=sys.argv[1]
 	print "Data directory is " + data_dir
@@ -217,3 +264,4 @@ import_tags(data_dir+"/Tags.xml")
 import_votes(data_dir+"/Votes.xml")
 import_postlinks(data_dir+"/PostLinks.xml")
 import_users(data_dir+"/Users.xml")
+import_posts(data_dir+"/Posts.xml")

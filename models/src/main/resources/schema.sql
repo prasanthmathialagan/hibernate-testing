@@ -70,3 +70,27 @@ CREATE TABLE `Users` (
   `downvotes` smallint,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `Posts`;
+CREATE TABLE `Posts` (
+  `id` bigint NOT NULL,
+  `postTypeId` smallint,
+  `parentId` bigint,
+  `acceptedAnswerId` bigint,
+  `createdDate` timestamp,
+  `score` smallint,
+  `views` int(11),
+  `ownerUserId` bigint,
+  `lastEditorUserId` bigint,
+  `lastEditorDisplayName` char(40),
+  `lastEditDate` timestamp,
+  `lastActivityDate` timestamp,
+  `communityOwnedDate` timestamp,
+  `closedDate` timestamp,
+  `title` varchar(150),
+  `tags` varchar(150),
+  `answerCount` smallint,
+  `commentCount` smallint,
+  `favoriteCount` smallint,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
